@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="dc729680-c243-41c0-b869-90c1392739ea" name="raspi" url="http://youpapaye.freeboxos.fr">
+        <fileTransfer host="youpapaye.freeboxos.fr" port="314" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="314" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
