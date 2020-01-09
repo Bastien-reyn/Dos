@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Get labels sheet</title>
+    <style>
+        *{
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+{% load static %}
+<iframe src="{% static "labels.pdf" %}" style="width: 100vw; height: 100vh">
+This browser does not support PDFs. Please download the PDF to view it: Download PDF
+</iframe>
+</body>
+</html>

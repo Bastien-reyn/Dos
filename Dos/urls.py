@@ -16,10 +16,35 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from app.views import  SearchView, LogInView
+from app.views import SearchView, LogInView, AddStockView, AddressesByCustomerView, RepairByCustomerView, GetLabels, \
+    AddItem, GetAllStockView, GetAllCat, Pay, GetAllPhoneModel, AddCategoryView, AddPhoneView, \
+    GetAllUserInfos, GetAllUserRepairs, GetSpecificCat, GetItemFromCatInStock, GetItemFromRepair, GetPaymentFromRepair, \
+    GetAllPaymentMethod, GenerateInvoice, EditPaymentStatus, GetInfoFromRepair, LinkItemToRepair
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', LogInView.as_view()),
     path('search', SearchView.as_view()),
+    path('addstock', AddStockView.as_view()),
+    path('customeraddresses', AddressesByCustomerView.as_view()),
+    path('customerrepair', RepairByCustomerView.as_view()),
+    path('getlabelpdf', GetLabels.as_view()),
+    path('additem', AddItem.as_view()),
+    path('stock', GetAllStockView.as_view()),
+    path('getallcat', GetAllCat.as_view()),
+    path('invoice', GenerateInvoice.as_view()),
+    path('paymentstatus', EditPaymentStatus.as_view()),
+    path('pay', Pay.as_view()),
+    path('getallphone', GetAllPhoneModel.as_view()),
+    path('addcategory', AddCategoryView.as_view()),
+    path('addphone', AddPhoneView.as_view()),
+    path('getalluserinfo', GetAllUserInfos.as_view()),
+    path('getallpaymentmethod', GetAllPaymentMethod.as_view()),
+    path('getalluserrepair', GetAllUserRepairs.as_view()),
+    path('getspecificcat', GetSpecificCat.as_view()),
+    path('getitemfromcat', GetItemFromCatInStock.as_view()),
+    path('getitemfromrepair', GetItemFromRepair.as_view()),
+    path('getinfofromrepair', GetInfoFromRepair.as_view()),
+    path('getpaymentfromrepair', GetPaymentFromRepair.as_view()),
+    path('linkitemtorepair', LinkItemToRepair.as_view()),
 ]
