@@ -1,10 +1,13 @@
+import uuid
 from datetime import datetime
 
 import pyinvoice
+from django.core.files.storage import FileSystemStorage
 from pyinvoice.models import InvoiceInfo, ServiceProviderInfo, ClientInfo, Transaction
 from pyinvoice.templates import SimpleInvoice
 
-from app.models import CategoryItemPhoneRepair, Address, PhoneNumber, Repair, Invoice, RepairPayment, RepairState
+from app.models import CategoryItemPhoneRepair, Address, PhoneNumber, Repair, Invoice, RepairPayment, RepairState, \
+    Photos, Customer, Quotation, QuotationDetail
 
 
 def InvoiceMaker(repair_id=None, customer_id=None):
@@ -38,8 +41,14 @@ def InvoiceMaker(repair_id=None, customer_id=None):
 
         try:
             address = Address.objects.get(customer=full['usr'])
+            print(address)
         except Address.DoesNotExist:
-            address = {}
+            address = Address.objects
+            address.no = ""
+            address.street = ""
+            address.city = ""
+            address.cp = ""
+            address.country = ""
 
         try:
             phone = PhoneNumber.objects.get(customer=full['usr'])
@@ -52,8 +61,6 @@ def InvoiceMaker(repair_id=None, customer_id=None):
         #     type = "Devis"
         # elif full['state'].short_state == "HF" or full['state'].short_state == "P":
         #     type = "Facture"
-
-
 
         doc.invoice_info = InvoiceInfo(no_invoice, rep.date_repaired, datetime.now().date())  # Invoice info, optional
 
@@ -113,12 +120,13 @@ def InvoiceMaker(repair_id=None, customer_id=None):
                            '<br/>' + doc.service_provider_info.denomination +
                            ' Au capital de ' + doc.service_provider_info.capital +
                            ' - ' + doc.service_provider_info.siren +
-                           '<br/> Le défaut de paiement total ou partiel à la date d\'échéance indiquée sur la facture fera courir de façon automatique des intérêts, dès le premier jour de retard, au taux d\'intérêt légal. La totalité des frais de recouvrement demeureront à la charge du client débiteur. Aucun escompte ne sera pratiqué en cas de paiement anticipé.'+
-                           '<br/>Facture éditée le '+ str(datetime.now().date())+
+                           '<br/> Le défaut de paiement total ou partiel à la date d\'échéance indiquée sur la facture fera courir de façon automatique des intérêts, dès le premier jour de retard, au taux d\'intérêt légal. La totalité des frais de recouvrement demeureront à la charge du client débiteur. Aucun escompte ne sera pratiqué en cas de paiement anticipé.' +
+                           '<br/>Facture éditée le ' + str(datetime.now().date()) +
                            '</para>')
 
         doc.finish()
         return True
+
 
 def editPaymentStatus(repair_id=None, customer_id=None):
     total = total_payment = 0
@@ -127,8 +135,7 @@ def editPaymentStatus(repair_id=None, customer_id=None):
     ttc = total * 1.2
     for pp in RepairPayment.objects.filter(repair_id=repair_id):
         total_payment += float(pp.amount.replace(',', '.'))
-
-    if ttc == total_payment:
+    if ttc == total_payment and ttc + total_payment != 0:
         state = RepairState.objects.get(short_state="P")
     elif total_payment != 0 and ttc < total_payment:
         state = RepairState.objects.get(short_state="T")
@@ -142,3 +149,130 @@ def editPaymentStatus(repair_id=None, customer_id=None):
         Invoice.objects.filter(repair_id=repair_id).update(due=ttc - total_payment)
     except Invoice.DoesNotExist:
         invoice = Invoice.objects.create(repair_id=repair_id, due=ttc - total_payment)
+
+
+def upload_img(uploaded_file):
+    ext = uploaded_file.name[-4:]
+    if ext == '.png' or ext == '.jpg':
+        fs = FileSystemStorage(location='app/static/img/')
+        filename = fs.save(str(uuid.uuid4())[:8] + ext, uploaded_file)
+        uploaded_file_url = 'img/' + filename
+        Photos.objects.create(file=filename)
+        return {'success': True,
+                'file_name': uploaded_file_url,
+                'msg': 'File uploaded'}
+    else:
+        return {'success': False,
+                'msg': 'Bad file extension'}
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
+"""
+——————————————————————————————————————
+Get DB entry(ies)
+——————————————————————————————————————
+"""
+
+def getClientAddress(client_id):
+    return Address.objects.get(customer_id=client_id)
+
+
+"""
+——————————————————————————————————————
+Create DB entry
+——————————————————————————————————————
+"""
+
+
+def newAddress(no, street, city, cp, country, client):
+    # TODO make all the verifications
+    try:
+        address = Address.objects.create(no=no, street=street, city=city, cp=cp, country=country, customer=client)
+        return True, address
+    except:
+        return False, None
+
+
+def newPhone(no, client):
+    # TODO make all the verifications
+    try:
+        phone_number = PhoneNumber.objects.create(no_phone=no, customer=client)
+        return True, phone_number
+    except:
+        return False, None
+
+
+def newClient(firstname, famillyname, mail, cp):
+    # TODO make all the verifications
+    try:
+        today = datetime.now()
+        client = Customer.objects.create(firstname=firstname, famillyname=famillyname, mail=mail, cp=cp, date_signup=today)
+        return True, client
+    except:
+        print(Exception)
+        return False, None
+
+
+def newQuotation(client, repairer):
+    # TODO make all the verifications
+    try:
+        today = datetime.now()
+        quotation = Quotation.objects.create(customer=client, repairer=repairer, date_add=today)
+        return True, quotation
+    except:
+        print(Exception)
+        return False, None
+
+
+def addCatToQuotation(category, quotation, promo_id, sell_price):
+    # TODO make all the verifications
+    try:
+        QuotationDetail.objects.create(quotation=quotation, category=category, sell_promo_id=promo_id, sell_price=sell_price)
+        return True
+    except:
+        print(Exception)
+        return False
+
+"""
+——————————————————————————————————————
+Delete DB entry
+——————————————————————————————————————
+"""
+
+
+def delAddress(address_id):
+    # TODO make all the verifications
+    try:
+        address = Address.objects.get(id=address_id).delete()
+        return True
+    except:
+        return False
+
+
+def delPhone(phone_number_id):
+    # TODO make all the verifications
+    try:
+        PhoneNumber.objects.get(id=phone_number_id).delete()
+        return True
+    except:
+        return False
+
+
+def delClient(client_id):
+    # TODO make all the verifications
+    try:
+        today = datetime.now()
+        client = Customer.objects.get(id=client_id).delete()
+        return True
+    except:
+        return False
+
+

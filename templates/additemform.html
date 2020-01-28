@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}test{% endblock %}
+{% block content %}
     <form action="" method="POST">
         <input type="text" name="text">
         <select name="t">
@@ -12,5 +8,4 @@
         </select>
         <input type="submit">
     </form>
-</body>
-</html>
+{% endblock %}

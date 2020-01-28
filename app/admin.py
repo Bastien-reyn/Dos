@@ -2,7 +2,8 @@ from django.contrib import admin
 
 # Register your models here.
 from app.models import Customer, Category, Item, Phone, Repair, CategoryItemPhoneRepair, Token, Address, Photos, \
-    RepairPayment, RepairPhoto, PaymentMethod, RepairState, PhoneNumber, Invoice
+    RepairPayment, RepairPhoto, PaymentMethod, RepairState, PhoneNumber, Invoice, Promo, Quotation, QuotationDetail, \
+    FrenchAddress, Labels
 
 admin.site.register(Customer)
 admin.site.register(Phone)
@@ -19,3 +20,8 @@ admin.site.register(PaymentMethod)
 admin.site.register(RepairState)
 admin.site.register(PhoneNumber)
 admin.site.register(Invoice)
+admin.site.register(Promo)
+admin.site.register(Quotation)
+admin.site.register(QuotationDetail)
+admin.site.register(FrenchAddress)
+admin.site.register(Labels)
